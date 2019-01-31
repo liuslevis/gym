@@ -6,6 +6,7 @@ import numpy.random
 import gym
 from gym import spaces
 from gym.utils import seeding
+from gym.spaces import prng
 
 
 def flip(edge, np_random):
@@ -80,12 +81,10 @@ class KellyCoinflipGeneralizedEnv(gym.Env):
         self.maxRoundsMean=maxRoundsMean
         self.maxRoundsSD=maxRoundsSD
 
-        if reseed or not hasattr(self, 'np_random') : self.seed()
-
         # draw this game's set of parameters:
-        edge = self.np_random.beta(edgePriorAlpha, edgePriorBeta)
-        maxWealth = round(genpareto.rvs(maxWealthAlpha, maxWealthM, random_state=self.np_random))
-        maxRounds = int(round(self.np_random.normal(maxRoundsMean, maxRoundsSD)))
+        edge = prng.np_random.beta(edgePriorAlpha, edgePriorBeta)
+        maxWealth = round(genpareto.rvs(maxWealthAlpha, maxWealthM, random_state=prng.np_random))
+        maxRounds = int(round(prng.np_random.normal(maxRoundsMean, maxRoundsSD)))
 
         # add an additional global variable which is the sufficient statistic for the Pareto distribution on wealth cap;
         # alpha doesn't update, but x_m does, and simply is the highest wealth count we've seen to date:
@@ -110,6 +109,7 @@ class KellyCoinflipGeneralizedEnv(gym.Env):
         self.maxRounds = maxRounds
         self.rounds = self.maxRounds
         self.maxWealth = maxWealth
+        if reseed or not hasattr(self, 'np_random') : self.seed()
 
     def seed(self, seed=None):
         self.np_random, seed = seeding.np_random(seed)
